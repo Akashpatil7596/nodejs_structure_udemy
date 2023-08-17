@@ -16,7 +16,7 @@ app.use(bodyParser.json())
 
 import users from './services/v1/users/index.js'
 
-await mongo_connection(process.env.MONGO_URI)
+await mongo_connection('mongodb+srv://root:root@cluster0.u6ctlke.mongodb.net/?retryWrites=true&w=majority')
 
 app.use('/api', users)
 

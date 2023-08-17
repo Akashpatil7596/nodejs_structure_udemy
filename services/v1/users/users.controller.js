@@ -30,22 +30,31 @@ export const createUser = async (req, res, next) => {
 }
 
 export const login = async (req, res, next) => {
-    const { email } = req.body
-    const login = await User.findOne({
-        email: req.body.email,
-    })
+    const { email, confirm_email } = req.body
+
+    const login = await User.findOne(
+        {
+            email,
+        },
+        {
+            email: 1,
+            password: 1,
+        }
+    )
 
     const response = new Detail(login)
-    console.log('response', response)
-    // const checkPassword = await bcrypt.compare('67891', login.password)
-    // console.log(checkPassword)
-    // if (checkPassword) {
-    // const jwtu = await jwt.sign({ data: 'foobar' }, 'secret', {
-    //     expiresIn: '1d',
-    // })
-    // console.log('jwt', jwtu)
 
-    // const jwyVerify = await jwt.verify(jwtu, 'secret')
-    // console.log('jwyVerify', jwyVerify)
-    // // }
+    const checkPassword = await bcrypt.compare(confirm_email, login.password)
+
+    if (checkPassword) {
+        const generateToken = await jwt.sign({ id: login._id }, 'secret', {
+            expiresIn: '30d',
+        })
+
+        // const tokenVerify = await jwt.verify(generateToken, 'secret')
+
+        response.token = generateToken
+
+        res.status(200).json(response)
+    }
 }

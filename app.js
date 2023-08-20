@@ -16,14 +16,11 @@ app.use(bodyParser.json())
 
 import users from './services/v1/users/index.js'
 
-await mongo_connection('mongodb+srv://root:root@cluster0.u6ctlke.mongodb.net/?retryWrites=true&w=majority')
+await mongo_connection(
+    'mongodb+srv://root:root@cluster0.u6ctlke.mongodb.net/?retryWrites=true&w=majority'
+)
 
 app.use('/api', users)
-
-app.get('/',(req, res) => {
-    res.send('Yup I think This Works')
-    }
-)
 
 // unhandled routes
 app.all('*', (req, res, next) => {
@@ -37,6 +34,7 @@ app.all('*', (req, res, next) => {
 })
 
 app.use((err, req, res, next) => {
+    console.log(err)
     err.statusCode = err.statusCode || 500
     err.status = err.status || 'error'
 

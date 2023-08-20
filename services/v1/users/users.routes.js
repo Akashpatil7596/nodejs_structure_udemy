@@ -10,4 +10,10 @@ router.post('/v1/users/create', upload, createUser)
 
 router.post('/v1/users/login', login)
 
+router.get('/v1/users/get',(req,res) => {
+        console.log('hello')
+      res.send('Hello')
+        }
+)
+
 export default router

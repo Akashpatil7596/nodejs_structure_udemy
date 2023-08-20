@@ -41,6 +41,6 @@ app.use((err, req, res, next) => {
     })
 })
 
-app.listen(process.env.PORT || 80, () => {
-    console.log(`connected on port ${process.env.PORT}`)
+app.listen(80, () => {
+    console.log(`connected on port 80`)
 })

@@ -6,6 +6,8 @@ import Detail from '../../../config/class.js'
 
 export const createUser = async (req, res, next) => {
     try {
+        console.log(req.body)
+        
         const { password, confirm_password } = req.body
 
         req.body.password = await bcrypt.hash(req.body.password, 8)
@@ -25,6 +27,7 @@ export const createUser = async (req, res, next) => {
 
         res.status(200).json(user)
     } catch (error) {
+        console.log('error',error)
         next(error)
     }
 }

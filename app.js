@@ -19,7 +19,9 @@ import users from './services/v1/users/index.js'
 await mongo_connection('mongodb+srv://root:root@cluster0.u6ctlke.mongodb.net/?retryWrites=true&w=majority')
 
 app.use('/api', users)
-
+app.get('/',(req, res) => {
+    res.send('Yup I think This Works')
+       )
 // unhandled routes
 app.all('*', (req, res, next) => {
     // res.status(404).json({

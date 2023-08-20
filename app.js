@@ -21,6 +21,7 @@ await mongo_connection('mongodb+srv://root:root@cluster0.u6ctlke.mongodb.net/?re
 app.use('/api', users)
 app.get('/',((req, res) => {
     res.send('Yup I think This Works')
+    }
 )
 // unhandled routes
 app.all('*', (req, res, next) => {

@@ -6,24 +6,50 @@ import Detail from '../../../config/class.js'
 
 export const createUser = async (req, res, next) => {
     try {
-        const { password, confirm_password } = req.body
+        const { email } = req.body
+
+        const isExist = await User.findOne({ email: email }).lean()
+
+        if (isExist) {
+            return res.status(404).json({
+                success: false,
+                message: 'Email already registered try with different one'
+            })
+        }
 
         req.body.password = await bcrypt.hash(req.body.password, 8)
 
         const profile_picture = req.files.image.map((e) => e.filename)
 
-        const user = await new User({
-            email: req.body.email,
+        const user = new User({
+            email: email,
             password: req.body.password,
             confirm_password: req.body.confirm_password,
             profile_picture: profile_picture.toString(),
         })
 
-        user.validatePassword(password, confirm_password)
+        const passwordValidation = user.validatePassword(password, confirm_password)
+
+        if (!passwordValidation) {
+            return res.status(404).json({
+                success: false,
+                message: 'password and confirm password does not match'
+            })
+        }
 
         user.save()
 
-        res.status(200).json(user)
+        const response = {
+            name: user.name,
+            email: user.email,
+            profile_picture: user.profile_picture
+        }
+
+        return res.status(200).json({
+            success: true,
+            data: response,
+            message: 'Register successfully'
+        })
     } catch (error) {
         console.log('error', error)
         next(error)
@@ -31,11 +57,11 @@ export const createUser = async (req, res, next) => {
 }
 
 export const login = async (req, res, next) => {
-    const { email, confirm_email } = req.body
+    const { email, password } = req.body
 
     const login = await User.findOne(
         {
-            email,
+            email: email,
         },
         {
             email: 1,
@@ -45,17 +71,25 @@ export const login = async (req, res, next) => {
 
     const response = new Detail(login)
 
-    const checkPassword = await bcrypt.compare(confirm_email, login.password)
+    const checkPassword = await bcrypt.compare(password, login.password)
 
-    if (checkPassword) {
-        const generateToken = await jwt.sign({ id: login._id }, 'secret', {
+    if (!checkPassword) {
+        return res.status(404).json({
+            success: false,
+            message: 'Passwords does not match'
+        })
+    }
+    const generateToken = await jwt.sign(
+        {
+            id: login._id
+        },
+        process.env.JWT_SECRET || 'secretkey',
+        {
             expiresIn: '30d',
         })
 
-        // const tokenVerify = await jwt.verify(generateToken, 'secret')
+    response.token = generateToken
 
-        response.token = generateToken
+    res.status(200).json(response)
 
-        res.status(200).json(response)
-    }
 }

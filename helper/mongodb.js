@@ -3,9 +3,8 @@ const mongoose = require("mongoose");
 exports.mongo_connection = () => {
     mongoose.set("debug", true);
     try {
-        console.log(process.env.DB_MONGO_URL);
         mongoose.connect(
-            process.env.DB_MONGO_URL || "mongodb://localhost:27017/boiler-plat",
+            process.env.DB_MONGO_URL || "mongodb+srv://root:root@cluster0.u6ctlke.mongodb.net/aws-project?retryWrites=true&w=majority",
             { useNewUrlParser: true, useFindAndModify: false, useUnifiedTopology: true, useCreateIndex: true },
             function (err, db) {
                 if (err) {

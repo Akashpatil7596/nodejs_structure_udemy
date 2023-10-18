@@ -7,3 +7,4 @@ logs
 .env
 test.js
 .DS_Store
+ecosystem.config.js

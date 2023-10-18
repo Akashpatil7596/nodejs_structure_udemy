@@ -1,51 +1,92 @@
-import express from 'express'
+const createError = require("http-errors");
+const express = require("express");
+const path = require("path");
+const bodyParser = require("body-parser");
+const cookieParser = require("cookie-parser");
+const logger = require("morgan");
+const winston = require("winston");
+const fileUpload = require("express-fileupload");
+const morgan = require("morgan");
+var cors = require("cors");
+global.fetch = require("node-fetch");
 
-import 'dotenv/config'
+const commonResponse = require("./helper/commonResponse");
 
-import bodyParser from 'body-parser'
+const indexRouter = require("./routes/index");
+const { mongodb, s3Client } = require("./helper");
 
-import mongo_connection from './config/database.js'
+global.logger = winston.createLogger({
+    level: "info",
+    format: winston.format.combine(
+        winston.format.timestamp({ format: "YYYY-MM-DD HH:mm:ss" }),
+        winston.format.printf((info) => {
+            return `${info.timestamp} [${info.level}] : ${info.message}`;
+        })
+    ),
+    defaultMeta: { service: "user-service" },
+    transports: [
+        new winston.transports.File({
+            name: "file.info",
+            filename: "./logs/info.log",
+            level: "info",
+            maxsize: 1024 * 1024 * 1, // Bytes
+            maxFiles: 5,
+        }),
+        new winston.transports.File({
+            name: "file.error",
+            filename: "./logs/error.log",
+            level: "error",
+            maxsize: 1024 * 1024 * 1, // Bytes
+            maxFiles: 5,
+        }),
+    ],
+});
 
-const app = express()
+const app = express();
 
-const port = process.env.PORT || 80
+app.use(cors("*"));
 
-// parse application/x-www-form-urlencoded
-app.use(bodyParser.urlencoded({ extended: false }))
+// view engine setup
+app.set("views", path.join(__dirname, "views"));
+app.set("view engine", "ejs");
 
-// parse application/json
-app.use(bodyParser.json())
+app.use(morgan("dev"));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
+app.use(express.static(path.join(__dirname, "public")));
+app.use(fileUpload({ parseNested: true }));
 
-import users from './services/v1/users/index.js'
+indexRouter.initialize(app);
+mongodb.mongo_connection();
 
-await mongo_connection(
-    'mongodb+srv://root:root@cluster0.u6ctlke.mongodb.net/?retryWrites=true&w=majority'
-)
+// catch 404 and forward to error handler
+app.use(function (req, res, next) {
+    //next(createError(404));
+    const error = new Error("NOT_FOUND");
+    error.status = 404;
+    next(error);
+});
 
-app.use('/api/v1/users', users)
+app.use((error, req, res, next) => {
+    res.status(error.status || 500);
+    /*res.json({
+    error: true,
+    message: error.message,
+  });*/
+    //console.log("85 ",error);
+    return commonResponse.error(res, error.message, error.status);
+});
 
-// unhandled routes
-app.all('*', (req, res, next) => {
-    res.status(404).json({
-        status: 'Failed',
-        message: `Can't find ${req.originalUrl} on this server`,
-    })
-    // const err = new Error('Errors is here')
-    // console.log(err)
-    next(err)
-})
+// error handler
+app.use(function (err, req, res, next) {
+    // set locals, only providing error in development
+    res.locals.message = err.message;
+    res.locals.error = req.app.get("env") === "development" ? err : {};
 
-app.use((err, req, res, next) => {
-    console.log(err)
-    err.statusCode = err.statusCode || 500
-    err.status = err.status || 'error'
+    // render the error page
+    res.status(err.status || 500);
+    res.render("error");
+});
 
-    res.status(err.statusCode).json({
-        message: err.message,
-        status: err.status,
-    })
-})
-
-app.listen(port, () => {
-    console.log(`connected on port ${port}`)
-})
+module.exports = app;

@@ -3,7 +3,7 @@ var smtpTransport = require("nodemailer-smtp-transport");
 
 // Use sensible defaults for SMTP connection pooling
 var emailConfig = {
-    service: process.env.SMTP_SERVICE || gmail,
+    service: process.env.SMTP_SERVICE || "gmail",
     auth: {
         user: process.env.SMTP_AUTH_USER || "akashp.devstree@gmail.com",
         pass: process.env.SMTP_AUTH_PASSWORD || "maarllbwusdpnvlr",

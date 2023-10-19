@@ -2,32 +2,27 @@ import mongoose, { Schema, Model } from 'mongoose'
 
 import bcrypt from 'bcrypt'
 
-const UserSchema = new Schema(
-    {
-        name: {
-            type: String,
-        },
-        email: {
-            type: String,
-            unique: true,
-            required: true,
-        },
-        password: {
-            type: String,
-            select: false,
-        },
-        confirm_password: {
-            type: String,
-            select: false,
-        },
-        profile_picture: {
-            type: String,
-        },
+const UserSchema = new Schema({
+    name: {
+        type: String,
     },
-    {
-        collection: 'user-accounts',
-    }
-)
+    email: {
+        type: String,
+        unique: true,
+        required: true,
+    },
+    password: {
+        type: String,
+        select: false,
+    },
+    confirm_password: {
+        type: String,
+        select: false,
+    },
+    profile_picture: {
+        type: String,
+    },
+})
 
 UserSchema.methods.validatePassword = (password, confirm_password) => {
     if (password == confirm_password) {

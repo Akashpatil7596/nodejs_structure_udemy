@@ -1,12 +1,10 @@
 import { Router } from 'express'
+import registerValidation from './users.validation.js'
+import { createUser, login } from './users.controller.js'
 
 const router = Router()
 
-import upload from '../../../config/multer.js'
-
-import { createUser, login } from './users.controller.js'
-
-router.post('/register', upload, createUser)
+router.post('/register', registerValidation, createUser)
 
 router.post('/login', login)
 

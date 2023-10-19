@@ -8,7 +8,7 @@ import mongo_connection from './config/database.js'
 
 const app = express()
 
-const port = process.env.PORT || 80
+const port = 80
 
 // parse application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({ extended: false }))

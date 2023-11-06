@@ -1,14 +1,16 @@
-import mongoose from 'mongoose'
 import jwt from 'jsonwebtoken'
 import bcrypt from 'bcrypt'
-import User from './users.model.js'
+import moment from 'moment'
+import { generate } from 'otp-generator'
+import UserServices from './users.services.js'
 import Detail from '../../../config/class.js'
+import { uploadFile } from '../../../helper/file-upload.js'
 
 export const createUser = async (req, res, next) => {
     try {
         req.body.email = req.body.email.toLowerCase()
 
-        const isExist = await User.findOne({ email: req.body.email }).lean()
+        const isExist = await UserServices.getOne({ email: req.body.email })
 
         if (isExist) {
             return res.status(404).json({
@@ -17,22 +19,35 @@ export const createUser = async (req, res, next) => {
             })
         }
 
+        if (req?.files?.image) {
+            req.body.profile_picture = uploadFile('users', req.files.image)
+        }
+
+        req.body.otp = generate(4, {
+            upperCaseAlphabets: false,
+            specialChars: false,
+            lowerCaseAlphabets: false,
+            digits: true,
+        })
+
+        req.body.otp_expiration_time = moment().add(5, 'minutes')
+
         req.body.password = await bcrypt.hash(req.body.password, 8)
 
-        const profile_picture = req.files.image.map((e) => e.filename)
+        const storeUser = await UserServices.store(req.body)
 
-        req.body.profile_picture = profile_picture
-
-        const storeUser = new User(req.body).save()
+        const apiResonse = new Detail(storeUser)
 
         return res.status(200).json({
             success: true,
-            data: storeUser,
+            data: apiResonse,
             message: 'Register successfully',
         })
     } catch (error) {
-        console.log('error', error)
-        next(error)
+        return res.status(500).json({
+            success: false,
+            error: error,
+        })
     }
 }
 
@@ -48,8 +63,6 @@ export const login = async (req, res, next) => {
             password: 1,
         }
     )
-
-    const response = new Detail(login)
 
     const checkPassword = await bcrypt.compare(password, login.password)
 

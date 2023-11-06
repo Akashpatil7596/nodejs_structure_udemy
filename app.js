@@ -4,11 +4,15 @@ import 'dotenv/config'
 
 import bodyParser from 'body-parser'
 
+import fileUpload from 'express-fileupload'
+
 import mongo_connection from './config/database.js'
+
+import users from './services/v1/users/index.js'
 
 const app = express()
 
-const port = 80
+const port = 8080
 
 // parse application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({ extended: false }))
@@ -16,10 +20,10 @@ app.use(bodyParser.urlencoded({ extended: false }))
 // parse application/json
 app.use(bodyParser.json())
 
-import users from './services/v1/users/index.js'
+app.use(fileUpload({ parseNested: true }))
 
 await mongo_connection(
-    'mongodb+srv://root:root@cluster0.u6ctlke.mongodb.net/?retryWrites=true&w=majority'
+    'mongodb+srv://root:root@cluster0.u6ctlke.mongodb.net/aws-project?retryWrites=true&w=majority'
 )
 
 app.use('/api/v1/users', users)
@@ -30,9 +34,6 @@ app.all('*', (req, res, next) => {
         status: 'Failed',
         message: `Can't find ${req.originalUrl} on this server`,
     })
-    // const err = new Error('Errors is here')
-    // console.log(err)
-    next(err)
 })
 
 app.use((err, req, res, next) => {

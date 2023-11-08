@@ -12,7 +12,7 @@ import users from './services/v1/users/index.js'
 
 const app = express()
 
-const port = 8080
+const port = process.env.PORT || 80
 
 // parse application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({ extended: false }))

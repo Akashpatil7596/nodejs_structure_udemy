@@ -47,6 +47,6 @@ app.use((err, req, res, next) => {
     })
 })
 
-app.listen(port, () => {
+app.listen(port,'0.0.0.0', () => {
     console.log(`connected on port ${port}`)
 })

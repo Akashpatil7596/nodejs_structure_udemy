@@ -12,15 +12,11 @@ import routes from "./routes/v1/index.js";
 
 import mailTemplates from "./helper/email-templates.js";
 
-<<<<<<< HEAD
 import uploadMailTOAWS from "./helper/email-services.js";
 
 const app = express();
 
 const port = process.env.PORT || 80;
-=======
-const port = 8001
->>>>>>> b77d4d1e93752c2e9502b1d81c0f3d30001bbf63
 
 // parse application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({ extended: false }));

@@ -1,11 +1,13 @@
-import { Router } from 'express'
-import registerValidation from './users.validation.js'
-import { createUser, login } from './users.controller.js'
+import { Router } from "express";
+import UserValidation from "./users.validation.js";
+import UsersController from "./users.controller.js";
 
-const router = Router()
+const router = Router();
+const usersController = new UsersController();
+const usersValidation = new UserValidation();
 
-router.post('/register', registerValidation, createUser)
+router.post("/registeration", usersValidation.registerValidation, usersController.createUser);
 
-router.post('/login', login)
+router.post("/verify-user", usersValidation.verifyValidation, usersController.verifyUser);
 
-export default router
+export default router;

@@ -1,6 +1,6 @@
-import mongoose, { Schema, Model } from 'mongoose'
-import { VERIFICATION_STATUS } from '../../../helper/constants.js'
-import bcrypt from 'bcrypt'
+import mongoose, { Schema, Model } from "mongoose";
+import { VERIFICATION_STATUS } from "../../../helper/constants.js";
+import bcrypt from "bcrypt";
 
 const UserSchema = new Schema({
     username: {
@@ -28,17 +28,18 @@ const UserSchema = new Schema({
     verification_status: {
         type: String,
         enum: Object.values(VERIFICATION_STATUS),
+        required: true,
     },
-})
+});
 
 UserSchema.methods.validatePassword = (password, confirm_password) => {
     if (password == confirm_password) {
-        return true
+        return true;
     } else {
-        return false
+        return false;
     }
-}
+};
 
-const User = mongoose.model('User', UserSchema)
+const User = mongoose.model("User", UserSchema);
 
-export default User
+export default User;

@@ -1,52 +1,61 @@
-import express from 'express'
+import express from "express";
 
-import 'dotenv/config'
+import "dotenv/config";
 
-import bodyParser from 'body-parser'
+import bodyParser from "body-parser";
 
-import fileUpload from 'express-fileupload'
+import fileUpload from "express-fileupload";
 
-import mongo_connection from './config/database.js'
+import mongo_connection from "./config/database.js";
 
-import users from './services/v1/users/index.js'
+import routes from "./routes/v1/index.js";
 
-const app = express()
+import mailTemplates from "./helper/email-templates.js";
 
-const port = process.env.PORT || 80
+import uploadMailTOAWS from "./helper/email-services.js";
+
+const app = express();
+
+const port = process.env.PORT || 80;
 
 // parse application/x-www-form-urlencoded
-app.use(bodyParser.urlencoded({ extended: false }))
+app.use(bodyParser.urlencoded({ extended: false }));
 
 // parse application/json
-app.use(bodyParser.json())
+app.use(bodyParser.json());
 
-app.use(fileUpload({ parseNested: true }))
+// parse formData
+app.use(fileUpload({ parseNested: true }));
 
-await mongo_connection(
-    'mongodb+srv://root:root@cluster0.u6ctlke.mongodb.net/aws-project?retryWrites=true&w=majority'
-)
+await mongo_connection(process.env.MONGO_URI || "mongodb+srv://root:root@cluster0.u6ctlke.mongodb.net/aws-project?retryWrites=true&w=majority");
 
-app.use('/api/v1/users', users)
+// Load aws email templates
+for (const mail of mailTemplates) {
+    await uploadMailTOAWS(mail);
+}
+
+// routes
+app.use("/api", routes);
 
 // unhandled routes
-app.all('*', (req, res, next) => {
+app.all("*", (req, res, next) => {
     res.status(404).json({
-        status: 'Failed',
+        status: "Failed",
         message: `Can't find ${req.originalUrl} on this server`,
-    })
-})
+    });
+});
 
 app.use((err, req, res, next) => {
-    console.log(err)
-    err.statusCode = err.statusCode || 500
-    err.status = err.status || 'error'
+    console.log(err);
+    err.statusCode = err.statusCode || 500;
+    err.status = err.status || "error";
 
     res.status(err.statusCode).json({
         message: err.message,
         status: err.status,
-    })
-})
+    });
+});
 
 app.listen(port, () => {
-    console.log(`connected on port ${port}`)
-})
+    console.log(`connected on port ${port}`);
+});

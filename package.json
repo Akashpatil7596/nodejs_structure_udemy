@@ -21,6 +21,7 @@
     },
     "homepage": "https://github.com/Akashpatil7596/nodejs_structure_udemy#readme",
     "dependencies": {
+        "aws-sdk": "^2.1497.0",
         "bcrypt": "^5.1.0",
         "body-parser": "^1.20.2",
         "cors": "^2.8.5",
@@ -29,6 +30,7 @@
         "express-fileupload": "^1.4.1",
         "fs": "^0.0.1-security",
         "joi": "^17.11.0",
+        "joi-objectid": "^4.0.2",
         "jsonwebtoken": "^9.0.1",
         "moment": "^2.29.4",
         "mongoose": "^7.4.3",
@@ -41,5 +43,8 @@
     "devDependencies": {
         "ndb": "^1.1.5",
         "nodemon": "^3.0.1"
+    },
+    "engines": {
+        "node": ">=18.18.0 <20.0.0"
     }
 }

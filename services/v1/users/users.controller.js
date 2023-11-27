@@ -118,6 +118,43 @@ class UsersController {
             });
         }
     }
+
+    async login(req, res) {
+        try {
+            const { email, password } = req.body;
+
+            const user = await UserServices.getOne({ email: email }, { email: 1, username: 1, password: 1 });
+
+            if (!user) {
+                return res.status(400).json({
+                    success: false,
+                    message: "User Not Found",
+                });
+            }
+
+            const isVerify = await CommonFunctions.decryptedPassword(password, user.password);
+
+            if (isVerify) {
+                user.token = jwt.sign({ id: user._id }, process.env.JWT_SECRET_KEY, { expiresIn: 1672535413 });
+
+                return res.status(200).json({
+                    success: true,
+                    data: user,
+                    message: "User LoggedIn successfully",
+                });
+            } else {
+                return res.status(400).json({
+                    success: false,
+                    message: "Password does not match",
+                });
+            }
+        } catch (error) {
+            return res.status(500).json({
+                success: false,
+                error: error,
+            });
+        }
+    }
 }
 
 export default UsersController;

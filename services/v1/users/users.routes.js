@@ -10,4 +10,6 @@ router.post("/registeration", usersValidation.registerValidation, usersControlle
 
 router.post("/verify-user", usersValidation.verifyValidation, usersController.verifyUser);
 
+router.post("/login", usersValidation.loginValidation, usersController.login);
+
 export default router;

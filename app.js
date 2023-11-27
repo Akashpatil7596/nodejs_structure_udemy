@@ -1,22 +1,19 @@
 import express from "express";
-
 import "dotenv/config";
-
 import bodyParser from "body-parser";
-
 import fileUpload from "express-fileupload";
+import cors from "cors";
 
 import mongo_connection from "./config/database.js";
-
 import routes from "./routes/v1/index.js";
-
 import mailTemplates from "./helper/email-templates.js";
-
 import uploadMailTOAWS from "./helper/email-services.js";
 
 const app = express();
 
 const port = process.env.PORT || 80;
+
+app.use(cors("*"));
 
 // parse application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({ extended: false }));

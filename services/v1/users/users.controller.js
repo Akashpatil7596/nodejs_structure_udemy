@@ -2,10 +2,14 @@ import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import moment from "moment";
 import { generate } from "otp-generator";
+import ejs from "ejs";
+import path from "path";
+import { fileURLToPath } from "url";
 import UserServices from "./users.services.js";
 import Detail from "../../../config/class.js";
 import { uploadFile } from "../../../helper/file-upload.js";
 import sendMail from "../../../helper/aws-email.js";
+import sendNodeMail from "../../../helper/nodemailer.js";
 import CommonFunctions from "../../../helper/commonFunctions.js";
 import { VERIFICATION_STATUS } from "../../../helper/constants.js";
 
@@ -43,24 +47,40 @@ class UsersController {
             const storeUser = await UserServices.store(req.body);
 
             if (storeUser) {
-                const emailData = {
-                    from: process.env.SENDER_MAIL,
-                    to: storeUser.email,
-                    template: "Verification-mail",
-                    templateData: {
-                        name: storeUser.username,
-                        otp: storeUser.otp,
-                    },
+                let emailData = {};
+
+                const htmlData = {
+                    userName: storeUser.username,
+                    confirmationCode: storeUser.otp,
                 };
 
-                sendMail(emailData);
+                const __filename = new URL(import.meta.url).pathname;
+                const __dirname = path.dirname(__filename);
 
-                return res.status(200).json({
-                    success: true,
-                    data: storeUser,
-                    message: "Register successfully",
+                ejs.renderFile(templatePath, htmlData, function (err, data) {
+                    if (err) {
+                        console.log("🚀 ~ file: user.controller.js:165 ~ err:", err);
+                    } else {
+                        emailData = {
+                            from: "altair",
+                            to: storeUser.email,
+                            subject: "Just Testing, Don't Worry!",
+                            html: data,
+                            headers: {
+                                "Content-Type": "text/html",
+                            },
+                        };
+                    }
                 });
+
+                sendNodeMail(emailData);
             }
+
+            return res.status(200).json({
+                success: true,
+                data: storeUser,
+                message: "Register successfully",
+            });
         } catch (error) {
             return res.status(500).json({
                 success: false,
@@ -114,7 +134,7 @@ class UsersController {
         try {
             const { email, password } = req.body;
 
-            const user = await UserServices.getOne({ email: email }, { email: 1, username: 1, password: 1 });
+            const user = await UserServices.getOne({ email: email }, { email: 1, username: 1, password: 1, verification_status: 1 });
 
             if (!user) {
                 return res.status(400).json({
@@ -123,10 +143,17 @@ class UsersController {
                 });
             }
 
+            if (user.verification_status !== VERIFICATION_STATUS.VERIFIED) {
+                return res.status(400).json({
+                    success: false,
+                    message: "User Not registered, Verify Your Account First",
+                });
+            }
+
             const isVerify = await CommonFunctions.decryptedPassword(password, user.password);
 
             if (isVerify) {
-                user.token = jwt.sign({ id: user._id }, process.env.JWT_SECRET_KEY, { expiresIn: 1672535413 });
+                user.token = jwt.sign({ id: user._id, name: user.username }, process.env.JWT_SECRET_KEY, { expiresIn: "30d" });
 
                 return res.status(200).json({
                     success: true,
@@ -139,6 +166,22 @@ class UsersController {
                     message: "Password does not match",
                 });
             }
+        } catch (error) {
+            console.log("error", error);
+            return res.status(500).json({
+                success: false,
+                error: error,
+            });
+        }
+    }
+
+    async logout(req, res) {
+        try {
+            return res.status(200).json({
+                success: true,
+                data: {},
+                message: "User LoggedIn successfully",
+            });
         } catch (error) {
             return res.status(500).json({
                 success: false,

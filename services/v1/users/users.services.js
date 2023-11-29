@@ -1,6 +1,6 @@
 import User from "./users.model.js";
 
-class UserValidation {
+class UserServices {
     static async store(reqData) {
         try {
             return await new User(reqData).save();
@@ -26,4 +26,4 @@ class UserValidation {
     }
 }
 
-export default UserValidation;
+export default UserServices;

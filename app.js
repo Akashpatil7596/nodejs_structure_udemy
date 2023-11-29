@@ -21,15 +21,18 @@ app.use(bodyParser.urlencoded({ extended: false }));
 // parse application/json
 app.use(bodyParser.json());
 
+// set the view engine to ejs
+app.set("view engine", "ejs");
+
 // parse formData
 app.use(fileUpload({ parseNested: true }));
 
 await mongo_connection(process.env.MONGO_URI || "mongodb+srv://root:root@cluster0.u6ctlke.mongodb.net/aws-project?retryWrites=true&w=majority");
 
 // Load aws email templates
-for (const mail of mailTemplates) {
-    await uploadMailTOAWS(mail);
-}
+// for (const mail of mailTemplates) {
+//     await uploadMailTOAWS(mail);
+// }
 
 // routes
 app.use("/api", routes);

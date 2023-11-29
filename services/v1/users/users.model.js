@@ -32,14 +32,6 @@ const UserSchema = new Schema({
     },
 });
 
-UserSchema.methods.validatePassword = (password, confirm_password) => {
-    if (password == confirm_password) {
-        return true;
-    } else {
-        return false;
-    }
-};
-
 const User = mongoose.model("User", UserSchema);
 
 export default User;

@@ -42,13 +42,6 @@ class UsersController {
 
             const storeUser = await UserServices.store(req.body);
 
-            if (!storeUser) {
-                return res.status(400).json({
-                    success: false,
-                    message: "Server error",
-                });
-            }
-
             if (storeUser) {
                 const emailData = {
                     from: process.env.SENDER_MAIL,
@@ -60,16 +53,14 @@ class UsersController {
                     },
                 };
 
-                await sendMail(emailData);
+                sendMail(emailData);
+
+                return res.status(200).json({
+                    success: true,
+                    data: storeUser,
+                    message: "Register successfully",
+                });
             }
-
-            const apiResonse = new Detail(storeUser);
-
-            return res.status(200).json({
-                success: true,
-                data: apiResonse,
-                message: "Register successfully",
-            });
         } catch (error) {
             return res.status(500).json({
                 success: false,
@@ -89,7 +80,7 @@ class UsersController {
             if (isOtpExpired) {
                 return res.status(400).json({
                     success: false,
-                    message: "Otp provided by you is not expired, try registering process again.",
+                    message: "Otp provided by you is  expired, try registering process again.",
                 });
             }
 
